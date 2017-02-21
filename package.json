@@ -25,6 +25,7 @@
     "d3-scale": "*"
   },
   "devDependencies": {
+    "@types/es6-shim": "^0.31.32",
     "d3-scale": "^1.0.4",
     "typescript": "^2.1.6"
   }

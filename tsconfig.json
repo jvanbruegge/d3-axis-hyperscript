@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "ES6",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "outDir": "lib",
+        "target": "es5"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

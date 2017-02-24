@@ -1,6 +1,6 @@
 {
   "name": "d3-axis-hyperscript",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Generate human-readable axis for a given scale",
   "main": "lib/index.js",
   "scripts": {

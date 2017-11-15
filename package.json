@@ -2,11 +2,15 @@
   "name": "d3-axis-hyperscript",
   "version": "0.0.2",
   "description": "Generate human-readable axis for a given scale",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "module": "lib/es6/index.js",
+  "types": "lib/es6/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "tsc -d",
+    "build": "npm run build:es6 && npm run build:cjs && npm run build:example",
+    "build:es6": "tsc -d --outDir lib/es6",
+    "build:cjs": "tsc -d --module commonjs --outDir lib/cjs",
+    "build:example": "browserify example/test.js -o lib/example.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,6 +31,8 @@
     "d3-scale": "*"
   },
   "devDependencies": {
+    "@types/node": "^6.0.92",
+    "browserify": "^14.5.0",
     "d3-scale": "^1.0.6",
     "typescript": "^2.6.1"
   },

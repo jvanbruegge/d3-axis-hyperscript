@@ -22,7 +22,7 @@ export default class AxisGenerator<T> {
         private _scale: Scale<T>,
         private _position: Position,
         private _ticks: [number, string | undefined] = [0, ''],
-        private _tickSize: number = 6,
+        private _tickSize: number = 12,
         private _padding: number = 3
     ) {}
 
@@ -60,18 +60,19 @@ export default class AxisGenerator<T> {
         return new AxisGenerator(scale, 'Right');
     }
 
-    public (dimensions: Dimensions): VNode {
+    public call(dimensions: Dimensions): VNode {
         const ticks: VNode[] = this._scale.ticks(this._ticks[0])
-            .map(value => {
+            .map(x => [x, this._scale(x)])
+            .map(([value, p]) => {
                 return h('g', {}, [
                     h('text', { attrs: {
                         class: 'tickValue',
-                        x: getXForPosition(dimensions, this._position, this._padding, value),
-                        y: getYForPosition(dimensions, this._position, this._padding, value)
-                    }}, [this._scale.tickFormat(this.ticks[0], this.ticks[1])]),
+                        x: getXForPosition(dimensions, this._position, this._padding, p),
+                        y: getYForPosition(dimensions, this._position, this._padding, p)
+                    }}, [this._scale.tickFormat(this.ticks[0], this.ticks[1])(value)]),
                     h('line', { attrs: {
                         class: 'ticks',
-                        ...getXYPositions(this._position, this._tickSize, this._padding)
+                        ...getXYPositions(dimensions, this._position, this._tickSize, this._padding, p)
                     }})
                 ]);
             });
@@ -86,8 +87,8 @@ export default class AxisGenerator<T> {
 function getBaseLine(pos: Position, dimensions: Dimensions, padding: number, tickSize: number): VNode {
     if(pos === 'Bottom' || pos === 'Top') {
         const y = pos === 'Bottom' ?
-            dimensions.bottom + padding + 20 :
-            dimensions.top - padding - 20;
+            dimensions.bottom - padding - textHeight - tickSize / 2 :
+            dimensions.top + padding + textHeight + tickSize / 2;
 
         return h('line', { attrs: {
             class: 'axis',
@@ -98,8 +99,8 @@ function getBaseLine(pos: Position, dimensions: Dimensions, padding: number, tic
         }});
     }
     const x = pos === 'Left' ?
-        dimensions.left + padding + 40 :
-        dimensions.right - padding - 40;
+        dimensions.left + padding + textWidth + tickSize / 2 :
+        dimensions.right - padding - textWidth - tickSize / 2;
 
     return h('line', { attrs: {
         class: 'axis',
@@ -110,21 +111,43 @@ function getBaseLine(pos: Position, dimensions: Dimensions, padding: number, tic
     }});
 }
 
+const textWidth: number = 20;
+const textHeight: number = 20;
+
 function getXForPosition(dimensions: Dimensions, pos: Position, padding: number, value: number): number {
     if(pos === 'Left') { return padding; }
-    if(pos === 'Right') { return dimensions.right - padding - 40; }
+    if(pos === 'Right') { return dimensions.right - padding - textWidth; }
 
-    return value - 20;
+    return value - textWidth / 2;
 }
 
 function getYForPosition(dimensions: Dimensions, pos: Position, padding: number, value: number): number {
-    if(pos === 'Bottom') { return padding; }
-    if(pos === 'Top') { return dimensions.right - padding - 40; }
+    if(pos === 'Bottom') { return dimensions.bottom - padding; }
+    if(pos === 'Top') { return dimensions.top + padding + textHeight; }
 
-    return value - 20;
+    return value + textHeight / 2;
 
 }
 
-function getXYPositions(pos: Position, tickSize: number, padding: number): XYPositions {
-    return undefined as any;
+function getXYPositions(dimensions: Dimensions, pos: Position, tickSize: number, padding: number, value: number): XYPositions {
+    if(pos === 'Top' || pos === 'Bottom') {
+        const baseline = pos === 'Top' ?
+            dimensions.top + padding + textHeight + tickSize / 2 :
+            dimensions.bottom - textHeight - padding - tickSize / 2
+        return {
+            x1: value,
+            x2: value,
+            y1: baseline - tickSize / 2,
+            y2: baseline + tickSize / 2
+        };
+    }
+    const baseline = pos === 'Left' ?
+        dimensions.left + padding + textWidth + tickSize / 2 :
+        dimensions.right - padding - textWidth - tickSize / 2;
+    return {
+        x1: baseline - tickSize / 2,
+        x2: baseline + tickSize / 2,
+        y1: value,
+        y2: value
+    };
 }
